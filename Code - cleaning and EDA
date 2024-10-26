@@ -1,0 +1,44 @@
+
+#Import dataset
+
+dataset <- read.csv("C:/Users/aless/OneDrive/Desktop/Data Science Project/Dataset.csv")
+View(dataset)
+
+# Check for missing values in each column
+missing_values <- colSums(is.na(dataset))
+missing_values
+
+#There are no missing values in all the columns
+#If there were missing data we could have chose:
+- remove rows with
+dataset_cleaned <- na.omit(dataset)
+- impute missing values
+dataset$Age[is.na(dataset$Age)] <- mean(dataset$Age, na.rm = TRUE)
+
+#Check for unrealistic values in Height and Weight
+summary(dataset$Height)
+summary(dataset$Weight)
+
+#There are no extreme data according to the summaries
+
+#Ensure Consistent Data Types-Make sure each column has the correct data type
+str(dataset)
+
+#Convert categorical variables to factors
+dataset$Gender <- as.factor(dataset$Gender)
+dataset$family_history_with_overweight <- as.factor(dataset$family_history_with_overweight)
+dataset$FAVC <- as.factor(dataset$FAVC)
+dataset$CAEC <- as.factor(dataset$CAEC)
+dataset$SCC <- as.factor(dataset$SCC)
+dataset$SMOKE <- as.factor(dataset$SMOKE)
+dataset$FAF <- as.factor(dataset$FAF)
+dataset$CALC <- as.factor(dataset$CALC)
+dataset$MTRANS <- as.factor(dataset$MTRANS)
+
+# Convert "NObeyesdad" to an ordered factor with correct levels
+dataset$NObeyesdad <- factor(dataset$NObeyesdad, 
+                             levels = c("Insufficient_Weight", "Normal_Weight", 
+                                        "Overweight_Level_I", "Overweight_Level_II", 
+                                        "Obesity_Type_I", "Obesity_Type_II", "Obesity_Type_III"), 
+                             ordered = TRUE)
+
