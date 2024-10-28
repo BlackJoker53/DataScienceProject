@@ -42,6 +42,8 @@ dataset$NObeyesdad <- factor(dataset$NObeyesdad,
                                         "Obesity_Type_I", "Obesity_Type_II", "Obesity_Type_III"), 
                              ordered = TRUE)
 
+#Duplicated rows TO DO, CHANGE NAME OF FAMILY HISTORY AND NObeyesdad
+#
 library(ggplot2)
 #GGplot of the distribution of Age, Weight  and Technology
 ggplot(dataset, aes(x = Age)) + geom_histogram(bins = 30, fill = "blue", color = "black") + theme_minimal() + ggtitle("Age Distribution")
@@ -51,28 +53,28 @@ ggplot(dataset, aes(x = TUE)) + geom_histogram(bins = 30, fill = "red", color = 
 #GGplot of the Weight by Obesity Level
 ggplot(dataset, aes(x = NObeyesdad, y = Weight)) + geom_boxplot(fill = "orange") + theme_minimal() + ggtitle("Weight by Obesity Level")
 
-> table(dataset$Gender)
+table(dataset$Gender)
 
-Female   Male 
-  1043   1068 
-> table(dataset$family_history_with_overweight)
+#Female   Male 
+#  1043   1068 
+table(dataset$family_history_with_overweight)
 
-  no  yes 
- 385 1726 
-> table(dataset$FAVC)
+#  no  yes 
+# 385 1726 
+table(dataset$FAVC)
 
-  no  yes 
- 245 1866 
-> table(dataset$NObeyesdad)
+#  no  yes 
+# 245 1866 
+table(dataset$NObeyesdad)
 
-Insufficient_Weight       Normal_Weight 
-                272                 287 
- Overweight_Level_I Overweight_Level_II 
-                290                 290 
-     Obesity_Type_I     Obesity_Type_II 
-                351                 297 
-   Obesity_Type_III 
-                324 
+#Insufficient_Weight       Normal_Weight 
+#                272                 287 
+# Overweight_Level_I Overweight_Level_II 
+#                290                 290 
+#     Obesity_Type_I     Obesity_Type_II 
+#                351                 297 
+#   Obesity_Type_III 
+#               324 
 #The dataset has a fairly balanced distribution of 1043 females and 1068 males
 #There is a significant skew here: 1726 individuals reported a "yes", while only 385 reported "no". 
 #This suggests that a family history of overweight could be a strong indicator or correlate of obesity, and it will be interesting to see if this variable aligns with obesity levels
@@ -108,7 +110,7 @@ ggplot(dataset, aes(x = NObeyesdad, y = Age, fill = NObeyesdad)) +
   ggtitle("Age Distribution Across Obesity Levels") +
   labs(x = "Obesity Level", y = "Age") +
   theme(legend.position = "none")
-It might be worth exploring if certain age groups are more prone to specific obesity levels or if other factors like lifestyle and activity levels (which could change with age) play a role. Also look for outliers
+#It might be worth exploring if certain age groups are more prone to specific obesity levels or if other factors like lifestyle and activity levels (which could change with age) play a role. Also look for outliers
 
 # Proportion of Gender Across Obesity Levels
 ggplot(dataset, aes(x = NObeyesdad, fill = Gender)) +
@@ -118,9 +120,9 @@ ggplot(dataset, aes(x = NObeyesdad, fill = Gender)) +
   labs(x = "Obesity Level", y = "Proportion")
 
 # Bar Plot of CAEC (Calorie Consumption Frequency) by Obesity Level
-> ggplot(dataset, aes(x = NObeyesdad, fill = CAEC)) +
-+     geom_bar(position = "fill") +
-+     theme_minimal() +
-+     ggtitle("Proportion of Consumption of Food Between Meals (CAEC) by Obesity Level") +
-+     labs(x = "Obesity Level", y = "Proportion") +
-+     scale_fill_brewer(palette = "Set2", name = "Calorie Consumption")
+ggplot(dataset, aes(x = NObeyesdad, fill = CAEC)) +
+     geom_bar(position = "fill") +
+     theme_minimal() +
+     ggtitle("Proportion of Consumption of Food Between Meals (CAEC) by Obesity Level") +
+     labs(x = "Obesity Level", y = "Proportion") +
+     scale_fill_brewer(palette = "Set2", name = "Calorie Consumption")
