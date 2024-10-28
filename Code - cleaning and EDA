@@ -21,32 +21,6 @@ missing_values
 #- impute missing values
 #dataset$Age[is.na(dataset$Age)] <- mean(dataset$Age, na.rm = TRUE)
 
-# Check for duplicated rows in the dataset
-> duplicated_rows <- sum(duplicated(dataset))
-> duplicated_rows
-[1] 24
-
-# Keep only one instance of each duplicated row
-dataset_cleaned <- dataset %>% distinct() 
-# Check the number of rows after removing duplicates
-nrow(dataset_cleaned)
-#[1] 2087
-# Verify if there are still any duplicates
-any(duplicated(dataset_cleaned))
-#[1] FALSE
-
-# Replace the original dataset with the cleaned one
-dataset <- dataset_cleaned
-
-# Remove the cleaned dataset variable
-rm(dataset_cleaned)
-
-#Check for unrealistic values in Height and Weight
-summary(dataset$Height)
-summary(dataset$Weight)
-
-#There are no extreme data according to the summaries
-
 #Ensure Consistent Data Types-Make sure each column has the correct data type
 str(dataset)
 
@@ -70,8 +44,82 @@ dataset$ObesityL <- factor(dataset$ObesityL,
 #Check after convertions
 str(dataset)
 
-#Duplicated rows TO DO
-#
+#DEEP ANALYSIS of SMOTE's Impact
+# Check class distribution of ObesityL
+table(dataset$ObesityL)
+
+# Visualize class distribution
+library(ggplot2)
+ggplot(dataset, aes(x = ObesityL)) +
+  geom_bar(fill = "blue", color = "black") +
+  theme_minimal() +
+  ggtitle("Class Distribution of Obesity Levels")
+
+#COMPARE IT TO THE ORIGINAL ONE, WE HAVE THE DISTRIBUTION IN TE DOCUMENTS
+#After applying SMOTE, the distribution appears much more balanced across all categories. Each class has a similar count, which is the intended effect of SMOTE to address class imbalance.
+# Check for duplicated rows in the dataset
+duplicated_rows <- sum(duplicated(dataset))
+duplicated_rows
+#[1] 24
+
+# Keep only one instance of each duplicated row
+dataset_cleaned <- dataset %>% distinct() 
+# Check the number of rows after removing duplicates
+nrow(dataset_cleaned)
+#[1] 2087
+# Verify if there are still any duplicates
+any(duplicated(dataset_cleaned))
+#[1] FALSE
+
+# Replace the original dataset with the cleaned one
+dataset <- dataset_cleaned
+
+# Remove the cleaned dataset variable
+rm(dataset_cleaned)
+
+# Density plot for Age
+ggplot(dataset, aes(x = Age, fill = ObesityL)) +
+   geom_density(alpha = 0.5) +
+   ggtitle("Age Distribution by Obesity Levels")
+#Some peaks appear sharp and could indicate overfitting or unnatural clustering due to synthetic data (for example, a prominent peak in "Obesity Type I" around the age of 30).
+#The categories appear to be well-separated, which may help the model learn patterns effectively, but it’s essential to ensure these separations are logical and not artifacts introduced by SMOTE.
+
+# Calculate summary statistics by obesity level
+dataset %>%
++     group_by(ObesityL) %>%
++     summarize(
++         Age_Mean = mean(Age, na.rm = TRUE),
++         Age_SD = sd(Age, na.rm = TRUE),
++         Height_Mean = mean(Height, na.rm = TRUE),
++         Height_SD = sd(Height, na.rm = TRUE),
++         Weight_Mean = mean(Weight, na.rm = TRUE),
++         Weight_SD = sd(Weight, na.rm = TRUE)
++     )
+
+#The summary statistics show relatively consistent means and standard deviations for Age, Height, and Weight across obesity levels, which suggests that SMOTE has preserved the overall distribution without introducing extreme values.
+#Interpretation: Since the means and standard deviations are similar across classes, it appears SMOTE didn’t drastically alter the dataset's variability. This consistency supports the idea that SMOTE effectively balanced the classes without distorting key variable distributions.
+
+# Perform K-means clustering and calculate silhouette score
+library(cluster)
+set.seed(123)
+kmeans_res <- kmeans(select(dataset, where(is.numeric)), centers = length(unique(dataset$ObesityL)))
+silhouette_score <- silhouette(kmeans_res$cluster, dist(select(dataset, where(is.numeric))))
+mean_silhouette_score <- mean(silhouette_score[, "sil_width"])
+mean_silhouette_score
+#[1] 0.4565147
+
+#Silhouette Score from K-means Clustering
+#The mean silhouette score of approximately 0.456 suggests a moderate level of cohesion within clusters and some separation between them. This score indicates that the clusters (representing obesity levels) are neither too distinct nor too blended.
+#Interpretation: A score close to 0.5 generally reflects reasonable class separability without excessive artificial separability. This score suggests that SMOTE has helped create distinguishable but not overly isolated clusters, which is desirable for class balance.
+
+#We conclude that SMOTE has balanced the dataset without drastically distorting it.
+
+#Check for unrealistic values in Height and Weight
+summary(dataset$Height)
+summary(dataset$Weight)
+
+#There are no extreme data according to the summaries
+
 library(ggplot2)
 #GGplot of the distribution of Age, Weight  and Technology
 ggplot(dataset, aes(x = Age)) + geom_histogram(bins = 30, fill = "blue", color = "black") + theme_minimal() + ggtitle("Age Distribution")
