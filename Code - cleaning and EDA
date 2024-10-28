@@ -4,6 +4,12 @@
 dataset <- read.csv("C:/Users/aless/OneDrive/Desktop/Data Science Project/Dataset.csv")
 View(dataset)
 
+library(dplyr)
+
+dataset <- dataset %>%
+  rename(familiarity = family_history_with_overweight,
+         ObesityL = NObeyesdad)
+
 # Check for missing values in each column
 missing_values <- colSums(is.na(dataset))
 missing_values
@@ -14,6 +20,26 @@ missing_values
 #dataset_cleaned <- na.omit(dataset)
 #- impute missing values
 #dataset$Age[is.na(dataset$Age)] <- mean(dataset$Age, na.rm = TRUE)
+
+# Check for duplicated rows in the dataset
+> duplicated_rows <- sum(duplicated(dataset))
+> duplicated_rows
+[1] 24
+
+# Keep only one instance of each duplicated row
+dataset_cleaned <- dataset %>% distinct() 
+# Check the number of rows after removing duplicates
+nrow(dataset_cleaned)
+#[1] 2087
+# Verify if there are still any duplicates
+any(duplicated(dataset_cleaned))
+#[1] FALSE
+
+# Replace the original dataset with the cleaned one
+dataset <- dataset_cleaned
+
+# Remove the cleaned dataset variable
+rm(dataset_cleaned)
 
 #Check for unrealistic values in Height and Weight
 summary(dataset$Height)
@@ -26,7 +52,7 @@ str(dataset)
 
 #Convert categorical variables to factors
 dataset$Gender <- as.factor(dataset$Gender)
-dataset$family_history_with_overweight <- as.factor(dataset$family_history_with_overweight)
+dataset$familiarity <- as.factor(dataset$familiarity)
 dataset$FAVC <- as.factor(dataset$FAVC)
 dataset$CAEC <- as.factor(dataset$CAEC)
 dataset$SCC <- as.factor(dataset$SCC)
@@ -35,14 +61,16 @@ dataset$FAF <- as.factor(dataset$FAF)
 dataset$CALC <- as.factor(dataset$CALC)
 dataset$MTRANS <- as.factor(dataset$MTRANS)
 
-# Convert "NObeyesdad" to an ordered factor with correct levels
-dataset$NObeyesdad <- factor(dataset$NObeyesdad, 
+# Convert "ObesityL" to an ordered factor with correct levels
+dataset$ObesityL <- factor(dataset$ObesityL, 
                              levels = c("Insufficient_Weight", "Normal_Weight", 
                                         "Overweight_Level_I", "Overweight_Level_II", 
                                         "Obesity_Type_I", "Obesity_Type_II", "Obesity_Type_III"), 
                              ordered = TRUE)
+#Check after convertions
+str(dataset)
 
-#Duplicated rows TO DO, CHANGE NAME OF FAMILY HISTORY AND NObeyesdad
+#Duplicated rows TO DO
 #
 library(ggplot2)
 #GGplot of the distribution of Age, Weight  and Technology
@@ -51,13 +79,13 @@ ggplot(dataset, aes(x = Weight)) + geom_histogram(bins = 30, fill = "green", col
 ggplot(dataset, aes(x = TUE)) + geom_histogram(bins = 30, fill = "red", color = "black") + theme_minimal() + ggtitle("Technology Usage Distribution (TUE)")
 
 #GGplot of the Weight by Obesity Level
-ggplot(dataset, aes(x = NObeyesdad, y = Weight)) + geom_boxplot(fill = "orange") + theme_minimal() + ggtitle("Weight by Obesity Level")
+ggplot(dataset, aes(x = ObesityL, y = Weight)) + geom_boxplot(fill = "orange") + theme_minimal() + ggtitle("Weight by Obesity Level")
 
 table(dataset$Gender)
 
 #Female   Male 
 #  1043   1068 
-table(dataset$family_history_with_overweight)
+table(dataset$familiarity)
 
 #  no  yes 
 # 385 1726 
@@ -65,7 +93,7 @@ table(dataset$FAVC)
 
 #  no  yes 
 # 245 1866 
-table(dataset$NObeyesdad)
+table(dataset$ObesityL)
 
 #Insufficient_Weight       Normal_Weight 
 #                272                 287 
@@ -80,8 +108,8 @@ table(dataset$NObeyesdad)
 #This suggests that a family history of overweight could be a strong indicator or correlate of obesity, and it will be interesting to see if this variable aligns with obesity levels
 #Frequent Consumption of High-Caloric Food (FAVC) --> Similar to family history, there is a clear skew: 1866 individuals report "yes" (frequent consumption of high-caloric food), while 245 say "no"
 
-# Boxplot of Weight by NObeyesdad
-ggplot(dataset, aes(x = NObeyesdad, y = Weight, fill = FAVC)) +
+# Boxplot of Weight by ObesityL
+ggplot(dataset, aes(x = ObesityL, y = Weight, fill = FAVC)) +
     geom_boxplot() +
     theme_minimal() +
     ggtitle("Boxplot of Weight by Obesity Level and High-Caloric Food Consumption") +
@@ -91,7 +119,7 @@ ggplot(dataset, aes(x = NObeyesdad, y = Weight, fill = FAVC)) +
 #For higher obesity types (e.g., Obesity Type I, II, and III), there is a noticeable difference in weight between those who frequently consume high-caloric food (FAVC = yes) and those who don't (FAVC = no). Those who answered "yes" to FAVC generally show higher weights.
 
 # Stacked Bar Chart
-ggplot(dataset, aes(x = NObeyesdad, fill = family_history_with_overweight)) +
+ggplot(dataset, aes(x = ObesityL, fill = familiarity)) +
     geom_bar(position = "fill") +  # Use "fill" for proportions
     theme_minimal() +
     ggtitle("Proportion of Family History of Overweight by Obesity Level") +
@@ -104,7 +132,7 @@ SO we can onsider conducting further statistical tests (e.g., chi-square tests) 
 In bulding models we need to consider these variables. We can also explore interactions between these variables and other factors (e.g., FAF, TUE) to see if there are additional layers of insight.
 
 #Age Distribution Across Obesity Levels
-ggplot(dataset, aes(x = NObeyesdad, y = Age, fill = NObeyesdad)) +
+ggplot(dataset, aes(x = ObesityL, y = Age, fill = ObesityL)) +
   geom_boxplot() +
   theme_minimal() +
   ggtitle("Age Distribution Across Obesity Levels") +
@@ -113,14 +141,14 @@ ggplot(dataset, aes(x = NObeyesdad, y = Age, fill = NObeyesdad)) +
 #It might be worth exploring if certain age groups are more prone to specific obesity levels or if other factors like lifestyle and activity levels (which could change with age) play a role. Also look for outliers
 
 # Proportion of Gender Across Obesity Levels
-ggplot(dataset, aes(x = NObeyesdad, fill = Gender)) +
+ggplot(dataset, aes(x = ObesityL, fill = Gender)) +
   geom_bar(position = "fill") +
   theme_minimal() +
   ggtitle("Gender Proportions Across Obesity Levels") +
   labs(x = "Obesity Level", y = "Proportion")
 
 # Bar Plot of CAEC (Calorie Consumption Frequency) by Obesity Level
-ggplot(dataset, aes(x = NObeyesdad, fill = CAEC)) +
+ggplot(dataset, aes(x = ObesityL, fill = CAEC)) +
      geom_bar(position = "fill") +
      theme_minimal() +
      ggtitle("Proportion of Consumption of Food Between Meals (CAEC) by Obesity Level") +
