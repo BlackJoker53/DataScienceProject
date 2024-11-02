@@ -1,1 +1,170 @@
 
+
+
+
+datasetA <- dataset%>%
+  mutate(ObesityL = recode(ObesityL,
+                           "Insufficient_Weight"=1,
+                           "Normal_Weight" = 2,
+                           "Overweight_Level_I" = 3,
+                           "Overweight_Level_II" = 4,
+                           "Obesity_Type_I" = 5,
+                           "Obesity_Type_II" = 6,
+                           "Obesity_Type_III" = 7,
+                           ))
+View(datasetA)
+n_distinct(datasetA$ObesityL)
+
+str(datasetA$FAF)
+str(datasetA$ObesityL)
+datasetA$FAF <- as.numeric(datasetA$FAF)
+
+cor(datasetA$FAF, datasetA$ObesityL, method = "pearson")
+#  the corelation between the two is -0,1928462
+
+# Visualize correlation with a scatter plot
+ggplot(datasetA, aes(x = FAF, y = ObesityL)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(title = "Scatter Plot with Correlation Line",
+       x = "FAF",
+       y = "ObesityL") +
+  theme_minimal()
+
+# there is a negative corelation between the two
+
+str(datasetA$TUE)
+cor(datasetA$TUE, datasetA$ObesityL, method = "pearson")
+# the correlation is also negative and is -0,1153228
+
+n_distinct(datasetA$CALC)
+valeurs_uniques <- unique(dataset$CALC)
+print(valeurs_uniques)
+
+datasetA <- datasetA%>%
+  mutate(CALC = recode(CALC,
+                           "no"=1,        
+                           "Sometimes"=2, 
+                           "Frequently" =3,
+                           "Always"  =4 
+                           ))
+
+View(datasetA)
+
+cor(datasetA$CALC, datasetA$ObesityL, method = "pearson")
+# there is a positive corelation of 0,1552996
+
+valeurs_uniques <- unique(dataset$MTRANS)
+print(valeurs_uniques)
+
+datasetA <- datasetA%>%
+  mutate(MTRANS = recode(MTRANS,
+                       "Automobile"=1,
+                       "Bike"=2,
+                       "Motorbike"=3,
+                       "Public_Transportation"=4,
+                       "Walking"=5,
+                       ))
+                       
+                       
+View(datasetA)
+cor(datasetA$MTRANS, datasetA$ObesityL, method = "pearson")
+# there is a small positive corelation between the two data : 0,01620616
+
+
+
+hist(datasetA$FAF, 
+     main = "Histogram of FAF", 
+     xlab = "physical activity", 
+     col = "skyblue", 
+     border = "black")
+
+
+hist(datasetA$TUE, 
+     main = "Histogram of TUE", 
+     xlab = "time using technical device", 
+     col = "skyblue", 
+     border = "black")
+
+hist(datasetA$CALC, 
+     main = "Histogram of CALC", 
+     xlab = "alcohool drinking", 
+     col = "skyblue", 
+     border = "black")
+
+hist(datasetA$MTRANS, 
+     main = "Histogram of MTRANS", 
+     xlab = "use of transportation", 
+     col = "skyblue", 
+     border = "black")
+
+
+hist(datasetA$ObesityL, 
+     main = "Histogram of MTRANS", 
+     xlab = "type of weight", 
+     col = "skyblue", 
+     border = "black")
+
+
+library(ggplot2)
+library(reshape2)
+
+# Calculate the correlation matrix
+cor_matrix <- cor(datasetA[, c("FAF", "TUE", "CALC", "MTRANS","ObesityL")], use = "complete.obs")
+
+# Melt the correlation matrix into long format
+cor_long <- melt(cor_matrix)
+
+# Create the heatmap
+ggplot(cor_long, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  labs(title = "Correlation Heatmap", x = "Variables", y = "Variables") +
+  theme_minimal()
+
+
+# je vais faire la même chose pour deux autres variable.
+
+datasetA <- datasetA%>%
+  mutate(Gender_num = recode(Gender,
+                             "Female"=0,
+                             "Male"=1
+                             ))
+View(datasetA)
+
+cor(datasetA$Gender_num, datasetA$ObesityL, method = "pearson")
+# correlation -0,03191992
+cor(datasetA$Age, datasetA$ObesityL, method = "pearson")
+# correlation 0,2792305
+cor(datasetA$Height, datasetA$ObesityL, method = "pearson")
+# correlation 0,1248629
+
+cor(datasetA$Weight, datasetA$ObesityL, method = "pearson")
+# correlation 0.912453
+
+
+cor_matrix <- cor(datasetA[, c("Gender_num", "Age", "Height", "Weight","ObesityL")], use = "complete.obs")
+
+# Melt the correlation matrix into long format
+cor_long <- melt(cor_matrix)
+
+# Create the heatmap
+ggplot(cor_long, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  labs(title = "Correlation Heatmap", x = "Variables", y = "Variables") +
+  theme_minimal()
+
+
+cor_matrix <- cor(datasetA[, c("FAF", "TUE", "CALC", "MTRANS","ObesityL","Gender_num", "Age", "Height", "Weight")], use = "complete.obs")
+
+# Melt the correlation matrix into long format
+cor_long <- melt(cor_matrix)
+
+# Create the heatmap
+ggplot(cor_long, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  labs(title = "Correlation Heatmap", x = "Variables", y = "Variables") +
+  theme_minimal()
+
