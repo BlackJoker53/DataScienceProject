@@ -1,0 +1,163 @@
+At the beginning import the final dataset with new columns name and without duplicated rows
+
+
+
+
+
+# Plot the distribution of CAEC (Consumption of Food Between Meals)
+ggplot(dataset, aes(x = food_btw_meals)) +
+  geom_bar(fill = "lightblue") +
+  labs(title = "Distribution of Food Consumption Between Meals (CAEC)",
+       x = "Frequency of Food Consumption Between Meals",
+       y = "Count") +
+  theme_light()
+
+#Most individuals fall into the "Sometimes" category for CAEC,
+#This indicates that occasional snacking is more common in the dataset, while regular or constant snacking is less frequent. 
+
+#Plot the proportion of Obesity Levels by Food Consumption Between Meals
+ggplot(dataset, aes(x = food_btw_meals, fill = obesity_lev)) +
+  geom_bar(position = "dodge") +
+  theme_minimal() +
+  ggtitle("Proportion of Obesity Levels by Food Consumption Between Meals") +
+  ylab("Count")
+
+#Convert count to proportion
+dataset %>%
+  group_by(food_btw_meals, obesity_lev) %>%
+  summarise(count = n()) %>%
+  mutate(proportion = count / sum(count)) %>%
+  ggplot(aes(x = food_btw_meals, y = proportion, fill = obesity_lev)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(title = "Proportion of Obesity Levels by Frequency of Eating Between Meals (CAEC)",
+       x = "CAEC (Food Consumption Between Meals)",
+       y = "Proportion of Individuals",
+       fill = "Obesity Level") +
+  theme_minimal()
+
+#The "Always" and "Frequently" categories seem to have a higher proportion of individuals with Normal Weight and Insufficient Weight compared to other obesity levels. In contrast, the "No" category has a notable proportion of individuals with Overweight Level II and Obesity Type III.
+#Link between frequent snacking and higher obesity levels. 
+
+#High-Calorie Food Consumption by Food Consumption Between Meals
+ggplot(dataset, aes(x = food_btw_meals, fill = caloric_food)) +
+  geom_bar(position = "fill") +
+  theme_minimal() +
+  ggtitle("High-Calorie Food Consumption by Food Consumption Between Meals") +
+  xlab("Frequency of Eating Between Meals (CAEC)") +
+  ylab("Proportion") +
+  labs(fill = "High-Calorie Food Consumption")
+
+#While most participants who consume food between meals also consume high-calorie foods, those who snack more often don’t always do so with high-calorie options.
+
+#Distribution of Smoke
+
+ggplot(dataset, aes(x = smoke)) +
+  geom_bar(fill = "lightblue", color = "black") +
+  theme_minimal() +
+  ggtitle("Distribution of Smoking Habits") +
+  xlab("Smoking Status") +
+  ylab("Count")
+
+#There are only 44 out of 2087 observations so the variable will not help up us
+
+# Histogram for CH2O (Daily Water Consumption)
+ggplot(dataset, aes(x = ch2o)) + 
+  geom_histogram(binwidth = 0.5, fill = "skyblue", color = "black") + 
+  theme_minimal() + 
+  ggtitle("Distribution of Water Consumption (CH2O)") + 
+  xlab("Liters of Water per Day") +
+  ylab("Count")
+
+#Water Consumption by Obesity Level
+
+ggplot(dataset, aes(x = obesity_lev, y = ch2o, fill = obesity_lev)) + 
+  geom_boxplot() + 
+  theme_minimal() + 
+  ggtitle("Water Consumption by Obesity Level") + 
+  ylab("Liters of Water per Day") + 
+  xlab("Obesity Level") +
+  labs(fill = "Obesity Level")
+
+#
+
+#Summary Statistics for ch2o by Obesity Level
+dataset %>%
+  group_by(obesity_lev) %>%
+  summarise(
+    mean_ch2o = mean(ch2o, na.rm = TRUE),
+    median_ch2o = median(ch2o, na.rm = TRUE),
+    sd_ch2o = sd(ch2o, na.rm = TRUE),
+    min_ch2o = min(ch2o, na.rm = TRUE),
+    max_ch2o = max(ch2o, na.rm = TRUE)
+  )
+
+#The mean values of water consumption (mean_ch2o) vary slightly across obesity levels, with Obesity Type III and Overweight Level II showing higher average water intake.
+#This pattern might indicate a trend where individuals with higher obesity levels report higher water intake. 
+
+#Density Plot
+ggplot(dataset, aes(x = ch2o, fill = obesity_lev)) +
+  geom_density(alpha = 0.4) +
+  theme_minimal() +
+  ggtitle("Density Plot of Water Consumption by Obesity Level") +
+  xlab("Liters of Water per Day") +
+  ylab("Density") +
+  labs(fill = "Obesity Level")
+
+#This visualization supports the finding that water consumption varies somewhat with obesity, but the overlap between categories suggests this trend is weak.
+
+# Cross-tabulation of calorie_check (SCC) and caloric_food (FAVC)
+scc_favc_tab <- dataset %>%
+    group_by(calorie_check, caloric_food) %>%
+    summarize(count = n()) %>%
+    mutate(proportion = count / sum(count))
+
+# View the cross-tabulation table
+print(scc_favc_tab)
+
+# Plotting high-calorie food consumption by self-perceived calorie monitoring
+ggplot(scc_favc_tab, aes(x = calorie_check, y = proportion, fill = caloric_food)) +
+    geom_bar(stat = "identity", position = "fill") +
+    theme_minimal() +
+    ggtitle("High-Calorie Food Consumption by Self-Perceived Calorie Monitoring") +
+    xlab("Self-Perceived Calorie Monitoring (SCC)") +
+    ylab("Proportion") +
+    scale_fill_manual(values = c("red", "turquoise"), labels = c("No", "Yes"))
+#Individuals who perceive themselves as high-calorie consumers (Self-Perceived High-Calorie Consumers = "yes") may demonstrate greater dietary awareness, as seen in the balanced proportions between Frequent Consumption of Vegetables = "yes" and Frequent Consumption of Vegetables = "no". This suggests they may be more mindful of calorie intake.
+
+ggplot(snacking_scc_tab, aes(x = food_btw_meals, y = proportion, fill = calorie_check)) +
+  geom_bar(stat = "identity", position = "fill") +
+  theme_minimal() +
+  ggtitle("Self-Perceived Calorie Monitoring by Snacking Frequency") +
+  xlab("Snacking Frequency (food_btw_meals)") +
+  ylab("Proportion") +
+  scale_fill_manual(values = c("red", "turquoise"), labels = c("No", "Yes")) +
+  labs(fill = "Calorie Monitoring (calorie_check)")
+
+#Frequent snackers are the least likely to monitor their calorie intake, potentially leading to unintentional overconsumption. 
+
+# Categorize age groups using the correct name for age
+dataset <- dataset %>%
+  mutate(Age_Group = case_when(
+    age >= 18 & age <= 30 ~ "Young",
+    age >= 31 & age <= 50 ~ "Middle-aged",
+    age > 50 ~ "Older"
+  ))
+
+# Cross-tabulation for calorie_check, caloric_food, Age_Group, and gender
+scc_favc_demo_tab <- dataset %>%
+  group_by(calorie_check, caloric_food, Age_Group, gender) %>%
+  summarize(count = n()) %>%
+  mutate(proportion = count / sum(count))
+
+# Plot High-Calorie Food Consumption by calorie_check, Age Group, and gender
+ggplot(scc_favc_demo_tab, aes(x = calorie_check, y = proportion, fill = caloric_food)) +
+  geom_bar(stat = "identity", position = "fill") +
+  facet_grid(gender ~ Age_Group) +
+  theme_minimal() +
+  ggtitle("High-Calorie Food Consumption by Self-Perceived Calorie Monitoring, Age Group, and Gender") +
+  xlab("Self-Perceived Calorie Monitoring") +
+  ylab("Proportion") +
+  scale_fill_manual(values = c("red", "turquoise"), labels = c("No", "Yes"))
+
+#The analysis shows that individuals who do not monitor their calorie intake tend to consume more high-calorie foods across all age groups and genders. Middle-aged adults, especially females, benefit the most from calorie monitoring, as they are more likely to avoid high-calorie foods. Younger and older individuals show less impact from calorie monitoring, suggesting they may need other strategies for effective dietary interventions. Promoting calorie awareness, particularly for middle-aged adults and females, could help reduce high-calorie food consumption.
